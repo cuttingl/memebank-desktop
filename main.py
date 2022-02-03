@@ -1,4 +1,6 @@
-from cv2 import cv2
+import cv2 as cv2
+import tensorflow as tf
+import numpy as np
 
 # detect object in image
 # language : python
@@ -15,5 +17,5 @@ def object_in_image(image):
         cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
 
 if __name__ == '__main__':
-    object_in_image('face.jpg')
+    object_in_image('./images/image.jpg')
     
