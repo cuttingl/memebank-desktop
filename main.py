@@ -1,21 +1,30 @@
-import cv2 as cv2
-import tensorflow as tf
+from transformers import DetrFeatureExtractor, DetrForObjectDetection
+from PIL import Image
+import streamlit as st
 import numpy as np
+import requests
 
-# detect object in image
-# language : python
-def object_in_image(image):
-    # read image
-    img = cv2.imread(image)
-    # convert image to gray scale
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    # detect face
-    face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
-    faces = face_cascade.detectMultiScale(gray, 1.3)
-    # draw rectangle around face
-    for (x, y, w, h) in faces:
-        cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
+
+def image_read(url_image):
+    # url = 'http://images.cocodataset.org/val2017/000000039769.jpg'
+    image = Image.open(url_image)
+
+    feature_extractor = DetrFeatureExtractor.from_pretrained('facebook/detr-resnet-50')
+    model = DetrForObjectDetection.from_pretrained('facebook/detr-resnet-50')
+
+    inputs = feature_extractor(images=image, return_tensors="pt")
+    outputs = model(**inputs)
+
+    # model predicts bounding boxes and corresponding COCO classes
+    logits = outputs.logits
+    bboxes = outputs.pred_boxes
+    
+    return logits, bboxes
 
 if __name__ == '__main__':
-    object_in_image('./images/image.jpg')
+    url_image = "./images/image.jpg"
+    bboxes,logits = image_read(url_image)
+    # print(logits, bboxes)
+    st.image(url_image, use_column_width=True)
+    st.write(bboxes)
     
